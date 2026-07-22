@@ -1,61 +1,39 @@
-import datetime
-def manager():
-    suma_wydatkow_na_miesiac = 0
-    try:
-        with open("wydatki.txt" ,"r") as file:
-            for line in file:
-                if ":" in line:
-                    szukane_wydatki = line.split(sep=":")[-1]
-                    wydatki_float = szukane_wydatki.replace("zl","").strip()
-                    suma_wydatkow_na_miesiac += float(wydatki_float)
-            ostatnia_data_w_pliku = line.split()[0]
-            ostatnia_data_w_pliku = datetime.datetime.strptime(ostatnia_data_w_pliku, "[%Y-%m-%d]").date()
-            print(ostatnia_data_w_pliku)
-        dzisiaj = datetime.date.today()
-        ile_dni_przerwy = (dzisiaj - ostatnia_data_w_pliku).days
-        if ile_dni_przerwy >=1:
-            print(f"Tyle dni ciebie nie bylo: {ile_dni_przerwy}")
-            for i in range(1,ile_dni_przerwy+1):
-                brakujaca_data = ostatnia_data_w_pliku + datetime.timedelta(days=i-1)
-                print(f"Uzupelnianie {brakujaca_data}")
-                try:
-                    kwota = float(input(f"Ile wtedy wydałeś? "))
-                    kat = input("Na co? ")
-                    with open("wydatki.txt", "a") as file:
-                        file.write(f"[{brakujaca_data}] [{kat}]: {kwota}zl\n")
-                    suma_wydatkow_na_miesiac += kwota
-                except ValueError:
-                    print("Pominąłeś ten dzień przez błędną kwotę!")
-                    continue
-        else:
-            print("Jestes na biezaco")
-    except FileNotFoundError:
-        print("Nie znaleziono pliku")
+from datetime import datetime
+data = datetime.now().strftime("%d.%m.%Y")
+class Wydatek:
+    def __init__(self, kwota, kategoria,opis, data):
+        self.kwota = kwota
+        self.kategoria = kategoria
+        self.opis = opis
+        self.data = data
+    def __str__(self):
+        return f"{self.kwota:.2f}, {self.kategoria}, {self.opis}, {self.data}"
 
-    while True:
-        print("1.Chcesz dodac wydatek\n"
-              "2.Chcesz zobaczyc sume wydatkow"
-              "\n3.Wyjdz")
+
+print("---MENEDZER FINANSOW---")
+print("1. Dodac wydatek")
+print("2. Pokaz podsumowanie")
+wybor = input("Co chcesz zrobic?")
+match wybor:
+    case "1":
+        while True:
+            try:
+                kwota = float(input("Podaj kwota: "))
+                kategoria = input("Podaj kategoria: ")
+                opis = input("Podaj opis: ")
+                break
+            except ValueError:
+                print("Cos zle wpisales")
+        nowy_wydatek = Wydatek(kwota, kategoria, opis, data)
+        with open("menedzersiana.txt", "a") as file:
+            file.write(str(nowy_wydatek) + "\n")
+    case "2":
         try:
-            wybor = int(input())
-            match wybor:
-                case 1:
-                    try:
-                        wydatek = float(input("Ile wydales dzisiaj kasy: "))
-                        suma_wydatkow_na_miesiac += wydatek
-                        kategoria_wydatku = str(input("Na co wydales te pieniadze: "))
-                        with open("wydatki.txt", "a") as file:
-                            (file.write(f"[{dzisiaj}] [{kategoria_wydatku}]: {wydatek}zl\n"))
-                        print("zapisano")
-                    except ValueError:
-                        print("Zle wpisales kwote. Wpisz jeszcze raz")
-                case 2:
-                    print(f"Suma wydatkow w tym miesiacu = {suma_wydatkow_na_miesiac}zl")
-                case 3:
-                    break
-                case _:
-                    print("Wybierz z listy 1-3")
-        except ValueError :
-            print("zle wpisales numer")
-if __name__ == "__main__":
-    manager()
+            with open("menedzersiana.txt", "r") as file:
+                suma = 0
+                for line in file:
+                    nowa_line=float(line.split(", ")[0])
+                    suma += nowa_line
+                print(f"Suma wszystkich wpisanych wydatkow to: {suma}zl")
+        except FileNotFoundError:
+            print("Nie znaleziono pliku.")
