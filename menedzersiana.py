@@ -126,4 +126,4 @@ while True:
             break
 
         case _:
-            print("\nNiepoprawny wybór. Wybierz opcję od 1 do 4.")
+            print("\nNiepoprawny wybór. Wybierz opcję od 1 do 5.")
